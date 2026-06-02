@@ -19,10 +19,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ios-private-ipa-${{ github.ref }}
-  cancel-in-progress: true
-
 env:
   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
   BUNDLE_ID: com.readori.music
@@ -57,16 +53,6 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Cache Bun dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.bun/install/cache
-            node_modules
-          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock', 'bun.lockb', 'package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
-
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
@@ -97,10 +83,7 @@ jobs:
             /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes: string audio" "$PLIST"
           fi
 
-          echo "Final CFBundleIdentifier:"
           /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$PLIST"
-
-          echo "Final UIBackgroundModes:"
           /usr/libexec/PlistBuddy -c "Print :UIBackgroundModes" "$PLIST"
 
       - name: Install CocoaPods
@@ -150,7 +133,7 @@ jobs:
           fi
 
           if [ -z "${BUILD_CERTIFICATE_BASE64}" ] || [ -z "${P12_PASSWORD}" ] || [ -z "${BUILD_PROVISION_PROFILE_BASE64}" ] || [ -z "${KEYCHAIN_PASSWORD}" ]; then
-            echo "Missing signing secrets. Configure BUILD_CERTIFICATE_BASE64, P12_PASSWORD, BUILD_PROVISION_PROFILE_BASE64, and KEYCHAIN_PASSWORD."
+            echo "Missing signing secrets."
             exit 1
           fi
 
@@ -180,8 +163,6 @@ jobs:
             "$KEYCHAIN_PATH"
 
           security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain-db
-
-          echo "Available code signing identities:"
           security find-identity -v -p codesigning "$KEYCHAIN_PATH"
 
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
@@ -194,19 +175,16 @@ jobs:
           EXPECTED_APP_IDENTIFIER="${APPLE_TEAM_ID}.${BUNDLE_ID}"
 
           echo "Installed profile name: $PROFILE_NAME"
-          echo "Installed profile UUID: $PROFILE_UUID"
           echo "Profile application identifier: $PROFILE_APP_IDENTIFIER"
           echo "Expected application identifier: $EXPECTED_APP_IDENTIFIER"
 
           if [ "$PROFILE_APP_IDENTIFIER" != "$EXPECTED_APP_IDENTIFIER" ]; then
             echo "Provisioning profile does not match APPLE_TEAM_ID + BUNDLE_ID."
-            echo "Make sure the Ad Hoc profile was generated for Bundle ID: $BUNDLE_ID"
             exit 1
           fi
 
           if ! /usr/libexec/PlistBuddy -c "Print :ProvisionedDevices" "$PROFILE_PLIST" >/dev/null 2>&1; then
             echo "This provisioning profile does not contain ProvisionedDevices."
-            echo "For private device installation, use an Ad Hoc or Development profile."
             exit 1
           fi
 
@@ -287,5 +265,3 @@ EOF
           path: ${{ env.EXPORT_PATH }}/*.ipa
           if-no-files-found: error
           retention-days: 1
-# force refresh Tue Jun  2 02:22:50 PDT 2026
-
