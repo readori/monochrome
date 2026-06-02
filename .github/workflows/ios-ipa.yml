@@ -94,7 +94,11 @@ jobs:
         run: |
           set -euo pipefail
           cd ios/App
-          pod install
+          if [ -f "Podfile" ]; then
+            pod install
+          else
+            echo "No Podfile found in ios/App, skipping pod install."
+          fi
 
       - name: Resolve Xcode export method
         run: |
