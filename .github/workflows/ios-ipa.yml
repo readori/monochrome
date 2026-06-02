@@ -94,7 +94,13 @@ jobs:
           /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes array" "$PLIST"
 
           if ! /usr/libexec/PlistBuddy -c "Print :UIBackgroundModes" "$PLIST" | grep -q "audio"; then
-            /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes: string audio" "$PLIST"
+            UI_BACKGROUND_INDEX=$( /usr/libexec/PlistBuddy -c "Print :UIBackgroundModes" "$PLIST" 2>/dev/null | grep -E '^[[:space:]]*[0-9]+:' | tail -n1 | sed -E 's/^[[:space:]]*([0-9]+):.*$/\1/' )
+            if [ -z "$UI_BACKGROUND_INDEX" ]; then
+              UI_BACKGROUND_INDEX=0
+            else
+              UI_BACKGROUND_INDEX=$((UI_BACKGROUND_INDEX + 1))
+            fi
+            /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes:$UI_BACKGROUND_INDEX string audio" "$PLIST"
           fi
 
           echo "Final CFBundleIdentifier:"
