@@ -24,13 +24,14 @@ env:
   BUNDLE_ID: com.readori.music
   XCODE_WORKSPACE: ios/App/App.xcworkspace
   XCODE_SCHEME: App
-  ARCHIVE_PATH: ${{ runner.temp }}/ReadoriMusic.xcarchive
-  EXPORT_PATH: ${{ runner.temp }}/ipa
 
 jobs:
   build-ipa:
     name: Build signed private IPA
     runs-on: macos-latest
+    env:
+      ARCHIVE_PATH: ${{ runner.temp }}/ReadoriMusic.xcarchive
+      EXPORT_PATH: ${{ runner.temp }}/ipa
 
     steps:
       - name: Checkout code
