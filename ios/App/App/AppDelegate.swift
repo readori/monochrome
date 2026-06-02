@@ -16,8 +16,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let session = AVAudioSession.sharedInstance()
         do {
             // .playback keeps audio alive when the app is backgrounded or the screen locks
-            try session.setCategory(.playback, mode: .default, options: [])
+            try session.setCategory(.playback, mode: .default, options: [.allowAirPlay])
             try session.setActive(true)
+            UIApplication.shared.beginReceivingRemoteControlEvents()
         } catch {
             print("[AudioSession] Failed to configure: \(error.localizedDescription)")
         }

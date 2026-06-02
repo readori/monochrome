@@ -458,6 +458,9 @@ export class Player {
 
     async setupMediaSession() {
         const setHandlers = async () => {
+            if (this._mediaSessionHandlersReady) return;
+            this._mediaSessionHandlersReady = true;
+
             await MediaSession.setActionHandler({ action: 'play' }, async () => {
                 const el = this.activeElement;
                 // Initialize and resume audio context first (required for iOS lock screen)
@@ -2082,6 +2085,7 @@ export class Player {
         el.pause();
         el.src = '';
         this.currentTrack = null;
+        this.clearMediaSession();
         this.queue = [];
         this.shuffledQueue = [];
         this.originalQueueBeforeShuffle = [];
@@ -2463,7 +2467,18 @@ export class Player {
             });
     }
 
+    clearMediaSession() {
+        void MediaSession.setPlaybackState({ playbackState: 'paused' }).catch(() => {});
+        void MediaSession.setMetadata({}).catch(() => {});
+        void this._updateBackgroundAudioService(false);
+    }
+
     updateMediaSessionPlaybackState() {
+        if (!this.currentTrack) {
+            this.clearMediaSession();
+            return;
+        }
+
         const isPlaying = !this.activeElement.paused;
         void MediaSession.setPlaybackState({ playbackState: isPlaying ? 'playing' : 'paused' });
 
