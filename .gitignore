@@ -24,3 +24,29 @@ package-lock.json
 # Q-DL Files
 qobuz-api
 Qobuz-DL
+# Apple signing private files
+*.p12
+*.cer
+*.pem
+*.key
+*.csr
+*.mobileprovision
+*.provisionprofile
+
+# Base64 exports for GitHub Secrets
+*.base64
+certificate.base64
+profile.base64
+
+# Local signing folders
+signing/
+certs/
+profiles/
+private/
+secrets/
+
+# Xcode / iOS build outputs
+build/
+DerivedData/
+*.xcarchive
+*.ipa
