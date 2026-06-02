@@ -23,7 +23,7 @@ permissions:
 
 env:
   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-  BUNDLE_ID: com.lookccp.monochrome.private
+  BUNDLE_ID: com.readori.music
   XCODE_WORKSPACE: ios/App/App.xcworkspace
   XCODE_SCHEME: App
   ARCHIVE_PATH: ${{ runner.temp }}/Monochrome.xcarchive
